@@ -123,7 +123,7 @@ func TestGenerateOutputPath(t *testing.T) {
 		},
 	}
 
-	g := &generator{}
+	g := &generator{forwaderPkg: "runtime"}
 	for _, c := range cases {
 		file := c.file
 		gots, err := g.Generate([]*descriptor.File{crossLinkFixture(file)})
@@ -149,5 +149,30 @@ func TestGenerateOutputPath(t *testing.T) {
 			t.Errorf("Generate(%#v) failed; got path: %s expected path: %s", file, gotPath, expectedPath)
 			return
 		}
+	}
+}
+
+func TestForwaderPkg(t *testing.T) {
+	reg := descriptor.NewRegistry()
+
+	if err := reg.SetForwaderPkg("github.com/grpc-ecosystem/grpc-gateway/fw"); err != nil {
+		t.Errorf("failed to set ForwaderPkg: %s", err)
+	}
+
+	gen := New(reg, true)
+	g := gen.(*generator)
+	if g.forwaderPkg != "fw" {
+		t.Errorf("invalid forwaderPkg = %q, expected = %q", g.forwaderPkg, "fw")
+	}
+
+	reg = descriptor.NewRegistry()
+	if err := reg.SetForwaderPkg(""); err != nil {
+		t.Errorf("failed to set forwaderPkg: %s", err)
+	}
+
+	gen = New(reg, true)
+	g = gen.(*generator)
+	if g.forwaderPkg != "runtime" {
+		t.Errorf("invalid forwaderPkg = %q, expected = %q", g.forwaderPkg, "runtime")
 	}
 }

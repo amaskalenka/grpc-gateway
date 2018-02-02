@@ -549,3 +549,31 @@ func TestLoadOverridedPackageName(t *testing.T) {
 		t.Errorf("file.GoPkg = %#v; want %#v", got, want)
 	}
 }
+
+func TestSetForwaderPkg(t *testing.T) {
+	reg := NewRegistry()
+
+	// set absolute path
+	if err := reg.SetForwaderPkg("/root"); err == nil {
+		t.Error("reg.SetForwaderPkg(/absolute/path) - ok; absolute path cannot be used as a forwader package")
+	}
+
+	var value = "github.com/grpc-ecosystem/grpc-gateway/runtime"
+	// set valid package name
+	if err := reg.SetForwaderPkg(value); err != nil {
+		t.Error("reg.SetForwaderPkg - failed to set forwader package")
+	}
+	if reg.ForwaderPkg.Name != "runtime" {
+		t.Errorf("invalid  value reg.ForwaderPkg.Name = %q, expected %q", reg.ForwaderPkg.Name, "runtime")
+	}
+	if reg.ForwaderPkg.Path != value {
+		t.Errorf("invalid  value reg.ForwaderPkg.Path = %q, expected %q", reg.ForwaderPkg.Path, value)
+	}
+	if reg.ForwaderPkg.Alias != "" {
+		t.Errorf("invalid  value reg.ForwaderPkg.Alias = %q, expected %q", reg.ForwaderPkg.Alias, "runtime_1")
+	}
+
+	if err := reg.SetForwaderPkg(""); err != nil {
+		t.Error("reg.SetForwaderPkg- failed to set empty forwader package")
+	}
+}

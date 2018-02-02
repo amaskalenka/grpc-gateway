@@ -15,6 +15,7 @@ type param struct {
 	*descriptor.File
 	Imports           []descriptor.GoPackage
 	UseRequestContext bool
+	ForwaderPkg       string
 }
 
 type binding struct {
@@ -70,6 +71,7 @@ func (f queryParamFilter) String() string {
 type trailerParams struct {
 	Services          []*descriptor.Service
 	UseRequestContext bool
+	ForwaderPkg       string
 }
 
 func applyTemplate(p param) (string, error) {
@@ -102,6 +104,7 @@ func applyTemplate(p param) (string, error) {
 	tp := trailerParams{
 		Services:          targetServices,
 		UseRequestContext: p.UseRequestContext,
+		ForwaderPkg:       p.ForwaderPkg,
 	}
 	if err := trailerTemplate.Execute(w, tp); err != nil {
 		return "", err
@@ -309,6 +312,7 @@ var (
 
 	trailerTemplate = template.Must(template.New("trailer").Parse(`
 {{$UseRequestContext := .UseRequestContext}}
+{{$ForwaderPkg := .ForwaderPkg}}
 {{range $svc := .Services}}
 // Register{{$svc.GetName}}HandlerFromEndpoint is same as Register{{$svc.GetName}}Handler but
 // automatically dials to "endpoint" and closes the connection when "ctx" gets done.
@@ -399,7 +403,7 @@ var (
 var (
 	{{range $m := $svc.Methods}}
 	{{range $b := $m.Bindings}}
-	forward_{{$svc.GetName}}_{{$m.GetName}}_{{$b.Index}} = {{if $m.GetServerStreaming}}runtime.ForwardResponseStream{{else}}runtime.ForwardResponseMessage{{end}}
+	forward_{{$svc.GetName}}_{{$m.GetName}}_{{$b.Index}} = {{$ForwaderPkg}}.{{if $m.GetServerStreaming}}ForwardResponseStream{{else}}ForwardResponseMessage{{end}}
 	{{end}}
 	{{end}}
 )

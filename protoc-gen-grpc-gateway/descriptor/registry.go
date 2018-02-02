@@ -36,6 +36,10 @@ type Registry struct {
 
 	// allowDeleteBody permits http delete methods to have a body
 	allowDeleteBody bool
+
+	// ForwaderPkg is a package that contains implementations for
+	// ForwardResponseMessage and ForwardResponseStream. May be nil
+	ForwaderPkg *GoPackage
 }
 
 // NewRegistry returns a new Registry.
@@ -220,6 +224,41 @@ func (r *Registry) SetPrefix(prefix string) {
 // rightmost slash is ignored.
 func (r *Registry) SetImportPath(importPath string) {
 	r.importPath = importPath
+}
+
+// SetForwaderPkg sets a package that contains implementations for
+// ForwardResponseMessage and ForwardResponseStream. It must be relative path.
+func (r *Registry) SetForwaderPkg(value string) error {
+	glog.V(2).Infof("setting import_forwader: %s", value)
+	if value == "" {
+		return nil
+	}
+
+	value = path.Clean(value)
+	if path.IsAbs(value) {
+		return fmt.Errorf("go package cannot have absolute path: %s", value)
+	}
+
+	pkg := &GoPackage{
+		Name: filepath.Base(value),
+		Path: value,
+	}
+
+	if err := r.ReserveGoPackageAlias(pkg.Name, pkg.Path); err != nil {
+		for i := 0; ; i++ {
+			alias := fmt.Sprintf("%s_%d", pkg.Name, i)
+			if err := r.ReserveGoPackageAlias(alias, pkg.Path); err == nil {
+				pkg.Alias = alias
+				break
+			}
+		}
+	}
+
+	r.ForwaderPkg = pkg
+
+	glog.V(2).Infof("import_forwader set to: %v", r.ForwaderPkg)
+
+	return nil
 }
 
 // ReserveGoPackageAlias reserves the unique alias of go package.
