@@ -229,7 +229,7 @@ func (r *Registry) SetImportPath(importPath string) {
 // SetForwardResponsePkg sets a package that contains implementations for
 // ForwardResponseMessage and ForwardResponseStream. It must be relative path.
 func (r *Registry) SetForwardResponsePkg(value string) error {
-	glog.V(2).Infof("setting import_forwader: %s", value)
+	glog.V(2).Infof("setting import_forwarder: %s", value)
 
 	if value == "" {
 		return nil
@@ -257,7 +257,7 @@ func (r *Registry) SetForwardResponsePkg(value string) error {
 
 	r.forwardResponsePkg = pkg
 
-	glog.V(2).Infof("import_forwader set to: %v", r.forwardResponsePkg)
+	glog.V(2).Infof("import_forwarder set to: %v", r.forwardResponsePkg)
 
 	return nil
 }
