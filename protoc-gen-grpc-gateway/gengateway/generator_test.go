@@ -123,7 +123,7 @@ func TestGenerateOutputPath(t *testing.T) {
 		},
 	}
 
-	g := &generator{forwaderPkg: "runtime"}
+	g := &generator{forwardResponsePkg: "runtime"}
 	for _, c := range cases {
 		file := c.file
 		gots, err := g.Generate([]*descriptor.File{crossLinkFixture(file)})
@@ -152,27 +152,29 @@ func TestGenerateOutputPath(t *testing.T) {
 	}
 }
 
-func TestForwaderPkg(t *testing.T) {
+func TestForwadResponsePgk(t *testing.T) {
 	reg := descriptor.NewRegistry()
 
-	if err := reg.SetForwaderPkg("github.com/grpc-ecosystem/grpc-gateway/fw"); err != nil {
-		t.Errorf("failed to set ForwaderPkg: %s", err)
+	// custom name - forward response package is set
+	if err := reg.SetForwardResponsePkg("github.com/grpc-ecosystem/grpc-gateway/fw"); err != nil {
+		t.Errorf("failed to set ForwardResponsePkg: %s", err)
 	}
 
 	gen := New(reg, true)
 	g := gen.(*generator)
-	if g.forwaderPkg != "fw" {
-		t.Errorf("invalid forwaderPkg = %q, expected = %q", g.forwaderPkg, "fw")
+	if g.forwardResponsePkg != "fw" {
+		t.Errorf("invalid forwardResponsePkg = %q, expected = %q", g.forwardResponsePkg, "fw")
 	}
 
 	reg = descriptor.NewRegistry()
-	if err := reg.SetForwaderPkg(""); err != nil {
-		t.Errorf("failed to set forwaderPkg: %s", err)
+	if err := reg.SetForwardResponsePkg(""); err != nil {
+		t.Errorf("failed to set empty forwardResponsePkg: %s", err)
 	}
 
+	// default name - forward response package is not set
 	gen = New(reg, true)
 	g = gen.(*generator)
-	if g.forwaderPkg != "runtime" {
-		t.Errorf("invalid forwaderPkg = %q, expected = %q", g.forwaderPkg, "runtime")
+	if g.forwardResponsePkg != "runtime" {
+		t.Errorf("invalid forwardResponsePkg = %q, expected = %q", g.forwardResponsePkg, "runtime")
 	}
 }

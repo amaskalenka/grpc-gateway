@@ -222,7 +222,7 @@ func TestApplyTemplateRequestWithoutClientStreaming(t *testing.T) {
 				},
 			},
 		}
-		got, err := applyTemplate(param{File: crossLinkFixture(&file), ForwaderPkg: "runtime"})
+		got, err := applyTemplate(param{File: crossLinkFixture(&file), ForwardResponsePkg: "runtime"})
 		if err != nil {
 			t.Errorf("applyTemplate(%#v) failed with %v; want success", file, err)
 			return
@@ -386,7 +386,7 @@ func TestApplyTemplateRequestWithClientStreaming(t *testing.T) {
 				},
 			},
 		}
-		got, err := applyTemplate(param{File: crossLinkFixture(&file), ForwaderPkg: "nonstandard"})
+		got, err := applyTemplate(param{File: crossLinkFixture(&file), ForwardResponsePkg: "nonstandard"})
 		if err != nil {
 			t.Errorf("applyTemplate(%#v) failed with %v; want success", file, err)
 			return

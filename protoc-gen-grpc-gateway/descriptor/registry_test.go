@@ -550,30 +550,46 @@ func TestLoadOverridedPackageName(t *testing.T) {
 	}
 }
 
-func TestSetForwaderPkg(t *testing.T) {
+func TestSetForwardResponsePkg(t *testing.T) {
 	reg := NewRegistry()
 
 	// set absolute path
-	if err := reg.SetForwaderPkg("/root"); err == nil {
-		t.Error("reg.SetForwaderPkg(/absolute/path) - ok; absolute path cannot be used as a forwader package")
+	if err := reg.SetForwardResponsePkg("/root"); err == nil {
+		t.Error("reg.SetForwardResponsePkg(/absolute/path) - ok; absolute path cannot be used as a forward response package")
 	}
 
 	var value = "github.com/grpc-ecosystem/grpc-gateway/runtime"
-	// set valid package name
-	if err := reg.SetForwaderPkg(value); err != nil {
-		t.Error("reg.SetForwaderPkg - failed to set forwader package")
+	// set standard package name
+	if err := reg.SetForwardResponsePkg(value); err != nil {
+		t.Error("reg.SetForwardResponsePkg - failed to set standard forward response package")
 	}
-	if reg.ForwaderPkg.Name != "runtime" {
-		t.Errorf("invalid  value reg.ForwaderPkg.Name = %q, expected %q", reg.ForwaderPkg.Name, "runtime")
+	if reg.ForwardResponsePkg().Name != "runtime" {
+		t.Errorf("invalid  value reg.ForwardResponsePkg().Name = %q, expected %q", reg.ForwardResponsePkg().Name, "runtime")
 	}
-	if reg.ForwaderPkg.Path != value {
-		t.Errorf("invalid  value reg.ForwaderPkg.Path = %q, expected %q", reg.ForwaderPkg.Path, value)
+	if reg.ForwardResponsePkg().Path != value {
+		t.Errorf("invalid  value reg.ForwardResponsePkg().Path = %q, expected %q", reg.ForwardResponsePkg().Path, value)
 	}
-	if reg.ForwaderPkg.Alias != "" {
-		t.Errorf("invalid  value reg.ForwaderPkg.Alias = %q, expected %q", reg.ForwaderPkg.Alias, "runtime_1")
+	if reg.ForwardResponsePkg().Alias != "" {
+		t.Errorf("invalid  value reg.ForwardResponsePkg().Alias = %q, expected %q", reg.ForwardResponsePkg().Alias, "")
 	}
 
-	if err := reg.SetForwaderPkg(""); err != nil {
-		t.Error("reg.SetForwaderPkg- failed to set empty forwader package")
+	// set external package name
+	value = "github.com/third-party-lib/runtime"
+	if err := reg.SetForwardResponsePkg(value); err != nil {
+		t.Error("reg.SetForwardResponsePkg - failed to set external forward response package")
+	}
+	if reg.ForwardResponsePkg().Name != "runtime" {
+		t.Errorf("invalid  value reg.ForwardResponsePkg().Name = %q, expected %q", reg.ForwardResponsePkg().Name, "runtime")
+	}
+	if reg.ForwardResponsePkg().Path != value {
+		t.Errorf("invalid  value reg.ForwardResponsePkg().Path = %q, expected %q", reg.ForwardResponsePkg().Path, value)
+	}
+	if reg.ForwardResponsePkg().Alias != "runtime_0" {
+		t.Errorf("invalid  value reg.ForwardResponsePkg().Alias = %q, expected %q", reg.ForwardResponsePkg().Alias, "runtime_0")
+	}
+
+	// set empty package
+	if err := reg.SetForwardResponsePkg(""); err != nil {
+		t.Error("reg.SetForwardResponsePkg- failed to set empty forward response package")
 	}
 }

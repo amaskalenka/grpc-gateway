@@ -21,28 +21,15 @@ var (
 )
 
 type generator struct {
-	reg               *descriptor.Registry
-	baseImports       []descriptor.GoPackage
-	useRequestContext bool
-	forwaderPkg       string
+	reg                *descriptor.Registry
+	baseImports        []descriptor.GoPackage
+	useRequestContext  bool
+	forwardResponsePkg string
 }
 
 // New returns a new generator which generates grpc gateway files.
 func New(reg *descriptor.Registry, useRequestContext bool) gen.Generator {
 	var imports []descriptor.GoPackage
-
-	var forwaderPkg string
-	if pkg := reg.ForwaderPkg; pkg != nil {
-		imports = append(imports, *pkg)
-
-		if pkg.Alias != "" {
-			forwaderPkg = pkg.Alias
-		} else {
-			forwaderPkg = pkg.Name
-		}
-	} else {
-		forwaderPkg = "runtime"
-	}
 
 	for _, pkgpath := range []string{
 		"io",
@@ -72,11 +59,25 @@ func New(reg *descriptor.Registry, useRequestContext bool) gen.Generator {
 		}
 		imports = append(imports, pkg)
 	}
+
+	var forwardResponsePkg string
+	if pkg := reg.ForwardResponsePkg(); pkg != nil {
+		imports = append(imports, *pkg)
+
+		if pkg.Alias != "" {
+			forwardResponsePkg = pkg.Alias
+		} else {
+			forwardResponsePkg = pkg.Name
+		}
+	} else {
+		forwardResponsePkg = "runtime"
+	}
+
 	return &generator{
-		reg:               reg,
-		baseImports:       imports,
-		useRequestContext: useRequestContext,
-		forwaderPkg:       forwaderPkg,
+		reg:                reg,
+		baseImports:        imports,
+		useRequestContext:  useRequestContext,
+		forwardResponsePkg: forwardResponsePkg,
 	}
 }
 
@@ -134,9 +135,9 @@ func (g *generator) generate(file *descriptor.File) (string, error) {
 
 	return applyTemplate(
 		param{
-			File:              file,
-			Imports:           imports,
-			UseRequestContext: g.useRequestContext,
-			ForwaderPkg:       g.forwaderPkg,
+			File:               file,
+			Imports:            imports,
+			UseRequestContext:  g.useRequestContext,
+			ForwardResponsePkg: g.forwardResponsePkg,
 		})
 }
